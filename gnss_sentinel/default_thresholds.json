@@ -1,0 +1,11 @@
+{
+ "thresholds": {
+  "cn0_agc": 3.8333332538604736,
+  "uniformity": 5.4680867195129395,
+  "clock": 6.46104621887207,
+  "raim": 2.6258444786071777,
+  "innovation": 18.76370620727539,
+  "cusum": 9.051563262939453
+ },
+ "note": "calibrated on 200 clean SYNTHETIC runs, 99th pct of per-run max score"
+}
