@@ -31,7 +31,7 @@ def build_html(rec, title="log", notes=()):
                 agc=[r["agc"] for r in rows], noi=[r["noi"] for r in rows], clk=[r["clk"] for r in rows],
                 s=[r["s"] for r in rows], lab=[r["lab"] for r in rows] if rec.label_seen else None,
                 alerts=rec.alerts, notes=list(notes))
-    js = json.dumps(data, separators=(",", ":")).replace("</", "<\\/")
+    js = json.dumps(data, separators=(",", ":")).replace("<", "\\u003c")   # log-supplied text (labels, file name) can never close or re-open the <script> block
     return TEMPLATE.replace("/*__DATA__*/null", js)
 
 

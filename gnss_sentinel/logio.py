@@ -12,7 +12,7 @@
    (GP, GL, GA, GB, GN, GI, ...) is accepted by matching the 3-letter sentence type only; NavIC-specific behaviour is not modelled.
    Epoch grouping: an epoch starts at each new GGA/RMC UTC time; GSV sentences are attached to the epoch most recently opened
    (so receivers must emit GGA/RMC before that epoch's GSV, which is the usual order)."""
-import csv, io, math
+import csv, math
 import numpy as np
 from .epoch import Epoch, NAN
 
@@ -193,11 +193,26 @@ class NmeaReader:
         return self._close()
 
 
+class _NmeaIter:
+    """Iterator over epochs of an NMEA stream; `.bad` counts sentences rejected so far (checksum/parse errors)."""
+    def __init__(self, lines):
+        self._r = NmeaReader(); self._it = self._gen(lines)
+
+    def _gen(self, lines):
+        for line in lines:
+            for e in self._r.feed(line): yield e
+        for e in self._r.flush(): yield e
+
+    @property
+    def bad(self): return self._r.bad
+
+    def __iter__(self): return self
+
+    def __next__(self): return next(self._it)
+
+
 def read_nmea(lines):
-    r = NmeaReader()
-    for line in lines:
-        for e in r.feed(line): yield e
-    for e in r.flush(): yield e
+    return _NmeaIter(lines)
 
 
 def detect_format(first_lines):

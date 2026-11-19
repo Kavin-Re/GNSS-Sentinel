@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip && pip install -r requirements-dev.txt
+      - name: Lint (undefined names, unused imports, syntax errors)
+        run: ruff check --select F,E9 .
+      - name: Unit tests
+        run: python -m pytest -q
+      - name: CLI smoke test (generate, stream, dashboard)
+        run: |
+          python -m gnss_sentinel gen meacon -o /tmp/m.csv --nmea /tmp/m.nmea --seed 11
+          cmp /tmp/m.csv examples/meacon.csv
+          python -m gnss_sentinel stream /tmp/m.csv --dashboard /tmp/m.html | tee /tmp/out.txt
+          grep -q "ALERT   clock" /tmp/out.txt
+          python -m gnss_sentinel stream /tmp/m.nmea --quiet
+          python -m gnss_sentinel stream examples/clean.csv --quiet > /tmp/clean.txt
+          grep -q "clock=0, raim=0" /tmp/clean.txt

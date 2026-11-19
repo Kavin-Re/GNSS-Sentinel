@@ -1,10 +1,10 @@
-import copy, math, os, sys, unittest
+import os, sys, unittest
 import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from gnss_sentinel.synth import generate
-from gnss_sentinel.detectors import (CN0AgcDetector, UniformityDetector, ClockDetector, RaimDetector, InnovationDetector,
+from gnss_sentinel.detectors import (ClockDetector, RaimDetector, InnovationDetector,
                                      CusumDetector, _wh_z, DETECTORS)
-from gnss_sentinel.pipeline import Pipeline, latch_series, load_thresholds
+from gnss_sentinel.pipeline import Pipeline, latch_series
 
 
 def run(det, eps):

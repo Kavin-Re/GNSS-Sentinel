@@ -52,6 +52,7 @@ def run_stream(lines, fmt="auto", thr=None, out=sys.stdout, quiet=False, use_clf
                     hint_last = classes[k]
         if not any_active: hint_last = None
     reader_bad = getattr(reader, "bad", 0)
+    if reader_bad: print("# WARNING: %d malformed NMEA sentence(s) skipped (bad checksum or unparsable fields)" % reader_bad, file=out)
     print("# processed %d epochs; alert episodes: %s" % (nepoch, ", ".join("%s=%d" % (n, counts[n]) for n in DET_ORDER)), file=out)
     na = [n for n, ok in (("clock", have["clock"]), ("cn0_agc AGC/noise terms", have["agc"]), ("raim", have["res"]),
                           ("cusum", have["vel"])) if not ok]
@@ -119,7 +120,15 @@ def main(argv=None):
     e.add_argument("--write-defaults", action="store_true", help="overwrite packaged thresholds/classifier with this run's")
     e.set_defaults(fn=cmd_eval)
     a = ap.parse_args(argv)
-    return a.fn(a)
+    try:
+        return a.fn(a)
+    except BrokenPipeError:                 # output piped into head/grep -q that closed early: not an error
+        try: sys.stdout = open(os.devnull, "w")
+        except OSError: pass
+        return 0
+    except (OSError, ValueError) as e:      # unreadable file, bad CSV header, ...: one line instead of a traceback
+        print("gnss_sentinel: error: %s" % e, file=sys.stderr)
+        return 2
 
 
 if __name__ == "__main__":

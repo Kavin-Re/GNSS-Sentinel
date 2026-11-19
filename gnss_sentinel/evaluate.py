@@ -10,7 +10,7 @@ import json, math, os, sys, time
 from multiprocessing import Pool
 import numpy as np
 from .synth import generate, SCENARIOS, ATTACKS
-from .pipeline import Pipeline, latch_series, window_features, RAW_NAMES, WINDOW, HERE
+from .pipeline import Pipeline, latch_series, window_features, WINDOW, HERE
 from .detectors import DET_ORDER
 from . import classifier as clf
 

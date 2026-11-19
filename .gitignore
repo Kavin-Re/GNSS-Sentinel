@@ -46,3 +46,15 @@ dist/
 *.wlf
 *.fsdb
 *.vpd
+
+# --- Python tooling caches / packaging ---
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+
+# --- Local evaluation / scratch output (the tracked results live in results/) ---
+results_quick/
+out/
+*.tgz
+*.tar.gz
+*.zip

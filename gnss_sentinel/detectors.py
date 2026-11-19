@@ -120,8 +120,10 @@ class CN0AgcDetector(Detector):
         parts.append("median C/N0 drop %.1f dB, worst-3 mean drop %.1f dB" % (f[0] - self.mu[0], f[1] - self.mu[1]))
         wide = z[0] > 3 and (z[2] > 3 or z[3] > 3)
         narrow = z[1] > 3 and z[0] < 3
+        added = (z[2] > 3 or z[3] > 3) and z[0] < 1 and z[1] < 3
         kind = ("wideband-jamming-like (all satellites degrade with AGC/noise rise)" if wide else
                 "narrowband/CW-like (a few satellites hit hard, rest nearly unaffected)" if narrow else
+                "in-band power rise without C/N0 loss (added-signal-like, e.g. repeater/spoofer power; not jamming-like)" if added else
                 "interference-like C/N0 degradation")
         return "; ".join(parts) + " -> " + kind
 
@@ -332,8 +334,8 @@ class CusumDetector(Detector):
     def _d_of(self, ep):
         if not ep.has_fix or not np.isfinite(ep.vel).any(): self.prev = None; return None
         cur = (ep.t, ep.pos.copy(), ep.vel.copy()); prev, self.prev = self.prev, cur
-        if prev is None or cur[0] - prev[0] > 3: return None
-        dt = cur[0] - prev[0]
+        dt = cur[0] - prev[0] if prev is not None else None
+        if dt is None or not (0 < dt <= 3): return None      # gap, duplicate or out-of-order timestamp: skip this pair
         return (cur[1] - prev[1]) - 0.5 * (cur[2] + prev[2]) * dt
 
     def _learn(self, ep):
@@ -342,8 +344,8 @@ class CusumDetector(Detector):
 
     def _finish(self):
         D = np.array(self._d) if self._d else np.ones((2, 3))
-        with np.errstate(all="ignore"):
-            sd = np.nanstd(D, 0)
+        with np.errstate(all="ignore"), warnings.catch_warnings():
+            warnings.simplefilter("ignore"); sd = np.nanstd(D, 0)      # an all-NaN axis (e.g. NMEA has no vertical velocity) is expected
         self.sd = np.maximum(np.nan_to_num(sd, nan=1.0), 0.5)
 
     def _score(self, ep):
