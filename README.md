@@ -1,5 +1,11 @@
 # GNSS-Sentinel
 
+> **Archived 2026-11-23.** Why: every result here comes from this repository's own synthetic generator,
+> and the detectors were tuned on the same generator family they were tested on. No test on a recorded
+> receiver log with a known interference event was done or is planned, so the numbers say little about real
+> receivers. The code stays readable and runnable; it is not maintained, and the roadmap below is not
+> scheduled.
+
 [![CI](https://github.com/Kavin-Re/GNSS-Sentinel/actions/workflows/ci.yml/badge.svg)](https://github.com/Kavin-Re/GNSS-Sentinel/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
 ![Dependencies](https://img.shields.io/badge/runtime%20deps-numpy%20only-informational)
@@ -182,4 +188,4 @@ untested against real receiver logs. Position/velocity resolution is limited by 
 
 ## Licence
 
-No licence file has been added yet, so default copyright applies (all rights reserved) until the author chooses one.
+Copyright 2026 Kavin K K. Licensed under the [Apache License, Version 2.0](LICENSE); see also [NOTICE](NOTICE).
